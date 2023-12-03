@@ -1,0 +1,389 @@
+% ./kyoto.saty と同じテーマを使っているが、
+% テーマの一部パラメータをユーザが書き換える例。
+
+@require: figbox/figbox
+@require: enumitem/enumitem
+@require: base/color-ext
+@require: easytable/easytable
+@require: math
+@require: colorbox/colorbox
+@require: bibyfi/bibyfi-IEEETran
+
+@import: ./kyoto
+@import: ./bib
+
+open FigBox
+open SlydifiOverlay
+open EasyTableAlias
+open EnumitemAlias
+open Colorbox
+
+let-inline ctx \cjk it =
+  let ctx = ctx |> set-dominant-narrow-script Kana in
+  read-inline ctx it
+
+let-inline ctx \cmark = 
+  let ctx = ctx |> set-font Kana           (`fonts-noto-sans-cjk-jp:NotoSansCJKjp-Bold`, 1.0, 0.0)
+                |> set-text-color (Color.of-css `green`) in
+    read-inline ctx {\cjk{✓}}
+
+let-inline ctx \xmark = 
+  let ctx = ctx |> set-font Kana           (`fonts-noto-sans-cjk-jp:NotoSansCJKjp-Bold`, 1.0, 0.0)
+                |> set-text-color (Color.of-css `red`) in
+    read-inline ctx {\cjk{×}}
+
+let-block ctx +small content = 
+  let ctx = ctx |> set-font-size 20pt in
+    read-block ctx content
+
+let-inline ctx \small it = 
+  let ctx = ctx |> set-font-size 20pt in
+    read-inline ctx it
+
+let-block ctx +big it = 
+  let ctx = ctx |> set-font-size 32pt in
+    read-block ctx it
+
+let-inline ctx \matches it = 
+  let ctx = ctx |> set-font Latin          (`fonts-noto-sans:NotoSans-Bold`, 1.0, 0.0)
+                |> set-text-color (Color.of-css `green`) in
+   read-inline ctx it
+
+let bibyfi-theme = BiByFiIEEETran.theme (|
+    name-shrink = true;
+    et-al = true;
+    journal-abbr = [(`European Association for Signal Processing`, `EUSIPCO`)];
+  |)
+in
+
+let fancy-config = (|
+  SlydifiThemeKyoto.default-config with  % 下に書いたフィールド以外はデフォルト値を使う
+    footer-right = {M.Waga};
+    enable-total-pagenum = false;
+|)
+
+in
+
+document '<
+
+  +set-config(fancy-config);
+
+  +make-title(|
+    title = {|\SLyDIFi; Kyoto Demo|};
+    author = {|Masaki Waga|};
+    affiliation = {||};
+    date = {| 2023 December 26th |};
+    logo-path = None;
+    logo-width = 185pt;
+  |);
+
+  +frame?:(2){\SATySFi; Confを後日追ったときの感想}<
+    +big<
+      +p{\br;}
+      +center {|「色々面白いけど、そもそもここ最近|\SATySFi; を全く使っていないな…」|}
+      +p{\br;}
+      +right?:(only 2){\cjk{→} スライドでも作ってみるか}
+    >
+  >
+
+  +frame{観察}<
+    +listing {
+      * (形式検証屋は) システムの仕様を論理式で書きたくなる
+      ** (モニタリング屋は) 実行列と形式仕様を比較したくなる
+      * ChatGPTみたいなシステムの仕様は
+      ** そもそも良くわからないし、
+      ** NGワード的な制約すら無数に組み合わせがありうる
+      * 「大体こういうのはNG」みたいな仕様を(半)形式的にモニタリングできないか？
+    }
+  >
+
+  +frame{観察}<
+    +listing {
+      * (形式検証屋は) システムの仕様を論理式で書きたくなる
+      ** (モニタリング屋は) 実行列と形式仕様を比較したくなる
+      * ChatGPTみたいなシステムの仕様は
+      ** そもそも良くわからないし、
+      ** NGワード的な制約すら無数に組み合わせがありうる
+      * 「大体こういうのはNG」みたいな仕様を(半)形式的にモニタリングできないか？
+    }
+  >
+
+  +frame{Summary}<
+    +listing{
+      * 単語埋め込みを使った「柔らかい」パターンマッチング
+      ** cf. 文字列検索、正規表現マッチング、(\*nixの) grep
+      * 動機 (表): 形式仕様に基づく実行時モニタリングの、LLMなど自然言語を扱うシステムへの応用 (の土台)
+      * 動機 (裏): 面白そうなアルゴリズムができてしまった
+      ** 今念頭にある以外にも使い道がありそう？
+      * \cmark;:  多分面白いことができている
+      * \xmark;:  具体的な良い使い道・見せ方が良くわからない
+      % * \xmark;:  分野横断的過ぎて、見せ方がよくわからない
+    }    
+  >
+
+  +frame{文字列パターンマッチング}<
+    +listing{
+      * 入力
+        ** 文字列: "Nobady knows now"
+        ** パターン: "now"
+      * マッチング結果: Nobady k\matches{now}s \matches{now}
+    }
+  >
+
+  +frame{文字列パターンマッチング}<
+    +small <
+      +easytable?:[v(1);t;b;m(1)][c;c;c;c;c;c;c;c;c;c;c;c;c;c;c;c;c] {
+|         | N | o | b | a | d | y |   | k | \matches{n} | \matches{o} | \matches{w} | s |   | \matches{n} | \matches{o} | \matches{w}
+| \xmark; | n | o | w |   |   |   |   |   |   |   |   |   |   |   |   | 
+| \xmark; |   | n | o | w |   |   |   |   |   |   |   |   |   |   |   |   
+% | \xmark; |   |   | n | o | w |   |   |   |   |   |   |   |   |   |   |   
+|         |   |   |   |   |   |   | ${\vdots}|   |   |   |   |   |   |   |   |   
+% | \xmark; |   |   |   | n | o | w |   |   |   |   |   |   |   |   |   |   
+% | \xmark; |   |   |   |   | n | o | w |   |   |   |   |   |   |   |   |   
+% | \xmark; |   |   |   |   |   | n | o | w |   |   |   |   |   |   |   |   
+% | \xmark; |   |   |   |   |   |   | n | o | w |   |   |   |   |   |   |   
+% | \xmark; |   |   |   |   |   |   |   | n | o | w |   |   |   |   |   |   
+| \cmark; |   |   |   |   |   |   |   |   | \matches{n} | \matches{o} | \matches{w} |   |   |   |   |   
+| \xmark; |   |   |   |   |   |   |   |   |   | n | o | w |   |   |   | 
+|         |   |   |   |   |   |   | ${\vdots}|   |   |   |   |   |   |   |  |
+% | \xmark; |   |   |   |   |   |   |   |   |   |   | n | o | w |   |   |   |
+% | \xmark; |   |   |   |   |   |   |   |   |   |   |   | n | o | w |   |   |
+| \xmark; |   |   |   |   |   |   |   |   |   |   |   |   | n | o | w |   
+| \cmark; |   |   |   |   |   |   |   |   |   |   |   |   |   | \matches{n} | \matches{o} | \matches{w}
+      |}
+    >
+  >
+
+  +frame{文字列マッチングの「読み飛ばし」}<
+    +Colorbox.colorbox [drop-shadow; colframe (Color.of-css `#081F57`); colback (Color.of-css `#081F57`)] <
+      +center {|\reverse-color{Idea: 事前にパターンを解析して、不要なマッチングを飛ばす}|}
+    >
+    +itemize(bullet) <
+      +item {不要なマッチング：飛ばしても結果が変わらない} <>
+      +item {事前にパターンを解析して、} <
+        +item ?:(dot-arabic) {不要なマッチングの情報をテーブルとして計算し} <>
+        +item ?:(dot-arabic) {マッチング時にテーブルを引きながら不要なマッチングを飛ばす} <>
+      >
+      +item {数多くのアルゴリズムが知られている} <
+        +item ?:(text-label {例：}) {Quick search \cite[`Sunday90`];}<>
+      >
+    >
+  >
+
+  +frame{意味を考慮した単語列マッチング}<
+    +Colorbox.colorbox [drop-shadow; colframe (Color.of-css `#081F57`); colback (Color.of-css `#081F57`)] <
+      +center ?:(Color.white) {|\reverse-color{Idea: 単語埋め込みを使ってベクトル列の比較に帰着}|}
+    >
+
+    % +fig-center(FigBox.include-image 640pt `./figs/word_embedding.pdf`);
+
+    +itemize(bullet) <
+      +item {ベクトル‐ベクトル(空間)間の類似度に基いてマッチング} <
+        +item {コサイン類似度を利用} <>
+      >
+      +item {単語埋め込みの (実験的な) 性質を使っている} <
+        +item ?:(text-label {例：}) {"似た"意味の単語は向きが似ている\small{\cite[`IYSN22`];}} <>
+      >
+    >
+  >
+
+  % +frame{意味を考慮した単語列マッチング}<
+  %   +Colorbox.colorbox [drop-shadow; colframe (Color.of-css `#081F57`); colback (Color.of-css `#081F57`)] <
+  %     +center ?:(Color.white) {Idea: 単語埋め込みを使ってベクトル列の比較に帰着}
+  %   >
+  %
+  %   +itemize(dot-arabic) <
+  %     +item {単語埋め込みを使って、単語をベクトル空間に埋め込む}<
+  %       +item ?:(bullet){テキストをベクトル列だと思う}<>
+  %     >
+  %     +item {同様にパターンをベクトル部分空間の列に埋め込む}<>
+  %     +item {ベクトル‐ベクトル空間間の類似度に基いてマッチング}<
+  %       +item ?:(bullet) {コサイン類似度を利用} <>
+  %     >
+  %   >
+  %   +itemize(bullet) <
+  %     +item {単語埋め込みの (実験的な) 性質を使っている} <
+  %       +item ?:(text-label {例：}) {"似た"意味の単語は向きが似ている\small{\cite[`IYSN22`];}} <>
+  %     >
+  %   >
+  % >
+
+  +frame{単語列マッチングの具体例}<
+    +listing{
+      * 単語列: "This is a big apple. That was the largest orange."
+      * パターン: "a large apple"
+      * 結果: This is \matches{a big apple}. That was \matches{the largest orange}.
+      ** large と big や largest は似た意味
+      ** apple と orange はどちらも果物
+      *** マッチするかどうかは閾値次第
+      ** a と the もある程度似ている
+    }
+  >
+
+  +frame{ポスターでのその他の内容}<
+    +listing{
+      % * 実行時モニタリングという「応用」から見たときの話
+      % ** このトークではアルゴリズム的な側面が主
+      * 実験・予備的な実験結果
+      * 今後のありそうな方向性・拡張
+      * "skipping" による高速化
+      ** cf. 文字列マッチングのためのKMPやBM
+      ** 正確にはQuick Search\small{\cite[`Sunday90`];}に基づく高速化
+      * (Laptopで) デモ
+    }
+  >
+
+  +section{|Appendix|}<
+    +frame{あるかもしれない質問 (1/2)} <
+      +listing {
+        * Q. 形式仕様を使う利点は？
+        ** A1. (恐らく他の多くの手法と比べて) 軽量に動作する
+        *** 少なくとも MacBook Air でもかなり高速に動く
+        ** A2. 仕様の性質について形式的に扱える
+        *** 非空判定や包含判定など
+      }
+   >
+    +frame{あるかもしれない質問 (2/2)} <
+      +listing {
+        * Q. 今回はオートマトンではないのか？
+        ** A. 文字列に分岐とループを許せばオートマトンになるし、そういう方向はできそう
+        *** symbolic automaton の一種として扱えそう
+        * Q. オートマトン学習は？
+        ** A. 仕様のminingをやるならオートマトン学習になる
+        *** 但し述語 (単語集合 or ベクトル部分空間) の推定が多分難しい
+      }
+    >
+    +frame{さらなる今後の展望} <
+      +listing {
+        * 量的な意味論を入れたい気がする
+        ** マッチする or しないの質的な意味から「マッチ度合い」へ
+        ** 単語単位では cosine 類似度をそのまま使いそう
+        ** どう aggregate するのが良いかがわからない
+        ** symbolic weighted automataか
+      }
+    >
+  >
+  % +section{|セクションスライドの|具体例|}<
+  %   +frame{フレーム作成 in \SLyDIFi;}<
+  %     +listing{
+  %       * フレーム：スライド資料の1ページ1ページに値するもの
+  %       * \SLyDIFi; では3種類のフレームを区別する
+  %         ** 見出し：スライド全体の題目，発表者名などを載せるフレーム
+  %         ** セクション見出し：セクションのタイトルを載せる
+  %         ** 本文：通常のフレーム
+  %     }
+  %   >
+
+  %   +frame{テキストの記述}<
+  %     +p{以下のようなコマンドを用いてテキストを記述できる．}
+  %     +listing{
+  %       * `+p{}`: 段落
+  %       * `+listing{}`: 番号のない箇条書き
+  %       * `+enumerate{}`: 番号付きの箇条書き
+  %     }
+  %     +p{さらに，インラインテキストの中では以下のマークアップが使える．}
+  %     +listing{
+  %       * `\emph{}`: \emph{強調}
+  %       * `\text-color(){}`: \text-color(Color.of-css `#42883B`){文字色変更}
+  %     }
+  %   >
+
+  %   +frame{図表の貼り付け（`FigBox` モジュール）}<
+  %     +listing{
+  %       * 例： ``+fig-center(FigBox.include-image 80pt `path/to/image.jpg`);``
+  %         ** `FigBox.include-image`：画像 (PDF/JPEG) を指定幅で読み込む
+  %         ** `+fig-center`：読み込んだ図を中央揃えで配置
+  %     }
+
+  %     +fig-on-right(dummy-box 100pt 200pt)<
+  %       +listing{
+  %         * その他にも様々な読み込み用の関数や配置コマンドが用意されている
+  %           ** `dummy-box`：指定されたサイズのダミーボックス
+  %           ** `hmargin`：水平方向に指定された量の余白を付ける
+  %           ** `vconcat`：鉛直方向に図を結合
+  %           ** `\fig-inline`：テキスト中\fig-inline?:(0.5)(dummy-box 60pt 30pt |> hmargin 5pt);に画像を出力
+  %           ** `+fig-on-right`：画像を右に，本文を左に配置
+
+  %       }
+  %     >
+
+  %   >
+  % >
+
+  % +section{|\SLyDIFi; でオーバーレイ|}<
+
+  %   +frame?:(3){オーバーレイの基礎}<
+
+  %     +p{
+  %       オーバーレイは、同じスライドに対して「レイヤーを上から重ねる」かのように
+  %       順々にアイテムを表示できる機能。
+  %     }
+
+  %     +ghost(only 1)<
+  %       +listing{
+  %         * 表示を一方的に追加していくだけでなく、特定の番号でのみアイテムを削除したり、
+  %           書式を変更したりすることも可能。
+  %         * 「何枚目のときに表示するか否か」を表す `int -> bool` 型の関数を用いて指定する。
+  %       }
+  %     >
+
+  %     +ghost(from 2)<
+  %       +listing{
+  %         * `+p?:(only 3){}` とすれば、3枚目に限り段落が出現する。
+  %         * `\emph?:(only 2){}` とすれば、2枚目に限り\emph?:(only 2){強調}できる。
+  %         * `+ghost(from 2)<>` とすれば、2枚目以降で出現するブロックが作れる。
+  %       }
+  %     >
+
+  %     +p?:(from 3){
+  %       いくつかのコマンドはオプション引数に条件を指定して、
+  %       条件を満たすときのみ表示を有効にすることができる。
+  %     }
+
+  %   >
+
+  %   +frame?:(4){オーバーレイの例 (\show-layer;/4)}<
+  %     +p{
+  %       箇条書きの要素のオーバーレイ表示。
+  %     }
+
+  %     +itemize(EnumitemAlias.paren-arabic)<
+  %       +item{この項目は常に表示される。}<>
+  %       +oitem(until 2){
+  %         `+oitem` コマンドを用いると「今オーバーレイの何枚目か」に応じて表示を出し分けられる。
+  %         この段落は 1, 2 枚目のとき\emph?:(only 2){のみ}表示される。
+  %       }<>
+  %       +oitem(between 2 3){これは 2, 3 枚目のときのみ表示される段落。}<>
+  %       +oitem(non (only 3)){これは 3枚目以外で表示される段落。}<>
+  %       +oitem(on-slides [1; 4]){これは 1, 4 枚目のときのみ表示される段落。}<>
+  %     >
+  %   >
+
+  %   +frame?:(4){オーバーレイの例2 (\show-layer;/4)}<
+  %     +p{
+  %       図のオーバーレイ表示も可能。
+  %     }
+
+  %     +fig-center(
+  %       vconcat ?:0.5 [
+  %         hconcat ?:0.5 [
+  %           dummy-box 150pt 60pt;
+  %           gap 20pt;
+  %           dummy-box 150pt 80pt |> fig-phantom (from 2);
+  %           gap 20pt;
+  %           dummy-box 150pt 100pt |> fig-phantom (from 3);
+  %         ];
+  %         gap 15pt;
+  %         textbox { 図が少しずつ大きくなっていく様子。 } |> fig-ghost (until 3);
+  %         textbox { 図が大きくなりきった様子。 } |> fig-ghost (only 4);
+  %       ] |> hvmargin 15pt |> frame 1pt (Color.gray 0.7)
+  %     );
+
+  %   >
+
+  % >
+
+  +frame{References}<
+    +makebibliography ?:(|sort-references=true; citestyle=CiteAsAuthorsPlus; name-shrink=true;|) (bibyfi-theme)(bibs);
+  >
+>
