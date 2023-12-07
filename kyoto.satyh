@@ -85,9 +85,9 @@ module SlydifiThemeKyoto: sig
 
 % alert
   % direct +alert : [color?; inline-text list] block-cmd
-  direct +right: [(int -> bool)?; inline-text] block-cmd
-  direct +center: [color?; (int -> bool)?; inline-text list] block-cmd
-  direct \center: [color?; (int -> bool)?; inline-text] inline-cmd
+  direct +right: [(int -> bool)?; inline-text list] block-cmd
+  direct +center: [(int -> bool)?; inline-text list] block-cmd
+  direct \center: [(int -> bool)?; inline-text] inline-cmd
   direct \reverse-color: [inline-text] inline-cmd
 
   direct +quote: [(int -> bool)?; inline-text] block-cmd
@@ -399,19 +399,21 @@ end = struct
     '< +ghost(dcf)< +item(it)(bt); > >
 
 % align
-  let-block ctx +right ?:dcf it =
+  let-block ctx +right ?:dcf its =
     let config = SlydifiParam.get config in
     let dcf = Option.from (fun _ -> true) dcf in
-    SlydifiOverlay.ghost-block dcf (line-break true true ctx (inline-fil ++ (read-inline ctx it)))
+    let centered-list = List.map (fun it -> (inline-fil ++ (read-inline ctx it))) its in
+    let it = List.fold-left (fun concat each -> concat ++ (read-inline ctx {\br;}) ++ each) (Option.unwrap-or inline-nil (List.head centered-list)) (Option.unwrap-or [] (List.tail centered-list)) in
+    SlydifiOverlay.ghost-block dcf (line-break true true ctx it)
 
-  let-block ctx +center ?:bg-color ?:dcf its =
+  let-block ctx +center ?:dcf its =
     let config = SlydifiParam.get config in
     let dcf = Option.from (fun _ -> true) dcf in
     let centered-list = List.map (fun it -> (inline-fil ++ (read-inline ctx it) ++ inline-fil)) its in
     let it = List.fold-left (fun concat each -> concat ++ (read-inline ctx {\br;}) ++ each) (Option.unwrap-or inline-nil (List.head centered-list)) (Option.unwrap-or [] (List.tail centered-list)) in
     SlydifiOverlay.ghost-block dcf (line-break true true ctx it)
 
-  let-inline ctx \center ?:bg-color ?:dcf it =
+  let-inline ctx \center ?:dcf it =
     let config = SlydifiParam.get config in
     let dcf = Option.from (fun _ -> true) dcf in
     SlydifiOverlay.ghost-inline dcf (inline-fil ++ (read-inline ctx it) ++ inline-fil)
