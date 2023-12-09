@@ -15,8 +15,10 @@
 @require: list
 
 type kyoto-config = (|
-  footer-right: inline-text; 
+  % The text put in the right of the footer
+  footer-right: inline-text;
 
+  % Show the total page number in addition to the current page number
   enable-total-pagenum : bool;
 
   font-normal : context -> context;
