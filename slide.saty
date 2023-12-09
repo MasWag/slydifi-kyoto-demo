@@ -95,7 +95,56 @@ document '<
     }
   >
 
-  +section{|ここからは|「こういうものが書ける」|という例|}<
+  +frame{Colorbox}<
+    +Colorbox.colorbox [drop-shadow; colframe (Color.of-css `#081F57`); colback (Color.of-css `#081F57`)] <
+      +center {|\reverse-color{こういうのを書きたいこと、ありますよね！}|
+               \reverse-color{Colorboxを使えばできますよ}
+      |}
+    >
+    +listing {
+      * \cjk{↑}みたいなalertみたいなものは\href(`https://github.com/abenori/satysfi-colorbox`){ColorBox}で実現できる
+      * こういう枠を任意の場所に追加するのも、\code(`SlydifiGraphics.put-text`);とかを使えば実現できそう？
+      ** 実はちょっと斜めにしたい、とかもある…
+    }
+    +Colorbox.colorbox [drop-shadow; colframe (Color.red); colback (Color.red)] <
+      +center {|\reverse-color{勿論色も変えられます}|}
+    >
+  >
+
+  +frame{Enumitem}<
+    +itemize(bullet) <
+      +item {柔軟な箇条書きは\href(`https://github.com/monaqa/satysfi-enumitem`){Enumitem}で実現できる} <>
+      +item {例えば} <
+        +item ?:(dot-arabic) {ここは数字で} <>
+        +item ?:(dot-alph) {ここはアルファベットで} <>
+        +item {ここは普通のbulletで} <>
+        +item ?:(text-label {甲：}) {もはや適当なテキストすら書ける}<>
+      >
+    >
+  >
+
+  +frame{\BiByFi;}<
+    +listing{
+      * 参考文献を載せるのであれば、\href(`https://github.com/namachan10777/BiByFi`){\BiByFi;}が使える
+    }
+    +p {一方で以下を何とかしたい}
+    +listing{
+      * Citationのスタイルがちょっと好みではない
+      ** \code(`bibyfi-IEEETran.satyh`);みたいなものを実装すれば良い
+      * 改ページ処理が上手く行かないような気がする
+      ** これは\BiByFi;本体の工事が必要？
+      ** \LaTeX;のbeamerなら\code(`allowframebreaks`);オプションで対応可能
+    }
+  >
+
+  +frame{その他}<
+    +listing {
+      * \href(`https://github.com/monaqa/satysfi-figbox`){Figbox}や\href(`https://github.com/monaqa/satysfi-easytable`){Easytable}も便利です
+      ** が、今回はちょっと省略
+    }
+  >
+
+  +section{|ここからは|「こういうものが書ける」|という具体例|}<
   +frame{文字列パターンマッチング}<
     +listing{
       * 入力
@@ -144,18 +193,6 @@ document '<
       >
     >
   >
-  >
-
-  +section{|Appendix|}<
-    +frame{このdemoで使っている主なパッケージ} <
-      +listing {
-        * 量的な意味論を入れたい気がする
-        ** マッチする or しないの質的な意味から「マッチ度合い」へ
-        ** 単語単位では cosine 類似度をそのまま使いそう
-        ** どう aggregate するのが良いかがわからない
-        ** symbolic weighted automataか
-      }
-    >
   >
 
   +frame{References}<
