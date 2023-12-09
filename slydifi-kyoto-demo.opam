@@ -1,0 +1,30 @@
+opam-version: "2.0"
+name: "slydifi-kyoto-demo"
+version: "0.0.1"
+synopsis: "Demo of SLyDiFi Kyoto theme"
+description: """Demo of SLyDiFi Kyoto theme"""
+
+maintainer: "Masaki Waga <masakiwaga@gmail.com>"
+authors: "Masaki Waga <masakiwaga@gmail.com>"
+license: "MIT"
+homepage: "https://github.com/MasWag/slydifi-kyoto-demo"
+bug-reports: "https://github.com/MasWag/slydifi-kyoto-demo/issues"
+dev-repo: "git+https://github.com/MasWag/slydifi-kyoto-demo.git"
+
+depends: [
+  "satysfi" { >= "0.0.10" & < "0.0.11" }
+  "satyrographos" { >= "0.0.2.6" & < "0.0.3" }
+
+  # If your library depends on other libraries, please write down here
+  "satysfi-dist"
+  "satysfi-base"
+
+  "satysfi-figbox"
+  "satysfi-enumitem"
+  "satysfi-easytable"
+  "satysfi-colorbox"
+  "satysfi-bibyfi"
+  "satysfi-class-slydifi"
+  "satysfi-fonts-noto-sans"
+  "satysfi-fonts-noto-sans-cjk-jp"
+]

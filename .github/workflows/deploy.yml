@@ -1,0 +1,39 @@
+name: Generate and upload the slide
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  doc:
+    runs-on: ubuntu-latest
+    container:
+      image: amutake/satysfi:latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Install dependencies
+      run: |
+        apt-get update && apt-get install -y pkg-config emacs pandoc gawk xz-utils liblzma-dev zip unzip poppler-utils
+
+    - name: Generate the documents
+      run: |
+        export HOME=/root
+        eval $(opam env)
+        opam update
+        opam pin add slydifi-kyoto-demo.opam "file://${PWD}"
+        satyrographos install
+        satysfi slide.saty
+        mkdir -p site
+        mv slide.pdf site
+        cd site && pdftoppm -png slide.pdf slide
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_branch: gh-pages
+        publish_dir: ./site
+        destination_dir: .
